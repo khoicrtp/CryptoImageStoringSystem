@@ -2,6 +2,7 @@ import pyrebase
 import mysql.connector
 import os
 
+
 #mysql://ba210f51bd8223:9bc50fbc@us-cdbr-east-05.cleardb.net/heroku_d08923bbc460fa4?reconnect=true
 mydb = mysql.connector.connect(
   host="us-cdbr-east-05.cleardb.net",
@@ -24,7 +25,7 @@ def selectAll():
   res = mycursor.fetchall()
   return res
 
-userID={"username": "UOa2", "password": "abc"}
+userID={"username": "UOa2", "password": "abc", "key":"1234"}
 path = userID["username"]+"/"
 
 firebaseConfig = {
@@ -39,24 +40,24 @@ firebaseConfig = {
   "serviceAccount": "serviceKey.json"
 };
 
-# firebase_storage = pyrebase.initialize_app(firebaseConfig)
-# storage=firebase_storage.storage()
+firebase_storage = pyrebase.initialize_app(firebaseConfig)
+storage=firebase_storage.storage()
 
-# def uploadImage(filename):
-#   storage.child(userID["username"]+"/"+filename).put(filename)
+def uploadImage(filename):
+  storage.child(userID["username"]+"/"+filename).put(filename)
 
-# def downloadImage(filename):
-#   storage.child(userID["username"]+"/"+filename).download(userID["username"]+"/"+filename)
+def downloadImage(filename):
+  storage.child(userID["username"]+"/"+filename).download(userID["username"]+"/"+filename)
 
-# uploadImage("3h.jpg")
+uploadImage("3h.jpg")
 
-# allFiles=storage.list_files()
-# #downloadImage("3h.jpg")
-# for file in allFiles:
-#   print(file)
-#   if(os.path.exists(path)==False):
-#     os.mkdir(path)
-#   storage.child(file.name).download(file.name)
+allFiles=storage.list_files()
+#downloadImage("3h.jpg")
+for file in allFiles:
+  print(file)
+  if(os.path.exists(path)==False):
+    os.mkdir(path)
+  storage.child(file.name).download(file.name)
 
 #insertUser("UOa2", "a2")
 print(selectAll())
