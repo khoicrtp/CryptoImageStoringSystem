@@ -12,9 +12,9 @@ mydb = mysql.connector.connect(
 )
 mycursor = mydb.cursor()
 
-def insertUser(username, password): 
-  sql = "INSERT INTO ACCOUNT (USERNAME, PASSWORD) VALUES (%s, %s);"
-  val = (username, password)
+def insertUser(username, password, publickey): 
+  sql = "INSERT INTO ACCOUNT (USERNAME, PASSWORD, PUBLICKEY) VALUES (%s, %s, %s);"
+  val = (username, password, publickey)
   mycursor.execute(sql, val)
   mydb.commit()
 
