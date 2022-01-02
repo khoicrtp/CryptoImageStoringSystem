@@ -1,3 +1,4 @@
+Cách chạy: chạy gui.py
 Ở tab Storage khi ấn vào 1 dòng trong listbox sẽ đợi khoảng 1 -> 2s để ảnh tải từ firebase mới hiện ra. Ảnh được hiện thỉ lấy từ ảnh output.jpg ngay tại source code.
 
 Mỗi lần upload ảnh ở tab upload thì qua Storage có nút refresh ấn vào nó sẽ cập nhập ảnh vừa up vào lsitbox.
