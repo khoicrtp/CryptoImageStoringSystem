@@ -1,57 +1,63 @@
-from logging import debug
-from flask.json import jsonify
-from query import *
-import flask
-from flask_restful import Api, Resource, reqparse, abort
-import json
+import pyrebase
+import mysql.connector
+import os
 
-app = flask.Flask(__name__)
-api = Api(app)
 
-def abort_register(user, password, confirm_password):
-    if password != confirm_password:
-        abort(404, message='Confirm password does not match')
-    if user:
-        abort(404, message='Username existed')
+#mysql://ba210f51bd8223:9bc50fbc@us-cdbr-east-05.cleardb.net/heroku_d08923bbc460fa4?reconnect=true
+mydb = mysql.connector.connect(
+  host="us-cdbr-east-05.cleardb.net",
+  user="ba210f51bd8223",
+  password="9bc50fbc",
+  database="heroku_d08923bbc460fa4"
+)
+mycursor = mydb.cursor()
 
-def abort_login(user):
-    if not user:
-        abort(404, message='Username does not exist or password is wrong')
+def insertUser(username, password, publickey): 
+  sql = "INSERT INTO ACCOUNT (USERNAME, PASSWORD, PUBLICKEY) VALUES (%s, %s, %s);"
+  val = (username, password, publickey)
+  mycursor.execute(sql, val)
+  mydb.commit()
 
-@app.route("/users/login/", methods=["GET"])
-def login():
-    json_data = json.loads(flask.request.get_json())
-    username = json_data["username"]
-    user = selectUser(username)
-    abort_login(user)
-    return {'password': str(user)}
+def selectAll():
+  sql = "SELECT * FROM ACCOUNT;"
+  #val = (username, password)
+  mycursor.execute(sql)
+  res = mycursor.fetchall()
+  return res
 
-@app.route("/users/register/", methods=["POST"])
-def register():
-    json_data = json.loads(flask.request.get_json())
-    username = json_data["username"]
-    password = json_data["password"]
-    confirm_password = json_data["confirm_password"]
-    publickey = json_data["publickey"]
-    user = selectUser(username)
-    abort_register(user, password, confirm_password)
-    insertUser(username, password, publickey)
-    return ''
+userID={"username": "UOa2", "password": "abc", "key":"1234"}
+path = userID["username"]+"/"
 
-@app.route("/images/", methods=["POST"])
-def getImage():
-    # file = flask.request.files['file']
-    # print(file)
-    # print(flask.request.get_json())
-    # json_data = json.loads(flask.request.get_json())
-    # username = json_data["username"]
-    # print(username)
-    # image_name = json_data["image_name"]
+firebaseConfig = {
+  "apiKey": "AIzaSyCrE2-NwCRX_aYNqWLO2vccndLsjFKpI6k",
+  "authDomain": "cryptoimagesystem.firebaseapp.com",
+  "projectId": "cryptoimagesystem",
+  "storageBucket": "cryptoimagesystem.appspot.com",
+  "databaseURL": "cryptoimagesystem.appspot.com",
+  "messagingSenderId": "116703538213",
+  "appId": "1:116703538213:web:0f4e675d3d7ed62133a3cc",
+  "measurementId": "G-4RQGMEBKYV",
+  "serviceAccount": "serviceKey.json"
+};
 
-    return ''
+firebase_storage = pyrebase.initialize_app(firebaseConfig)
+storage=firebase_storage.storage()
 
-# api.add_resource(UsersLogin, "/users/login")
-# api.add_resource(UsersRegister, "users/register")
+def uploadImage(filename):
+  storage.child(userID["username"]+"/"+filename).put(filename)
 
-if __name__ == "__main__":
-    app.run() # debug=True to log all output/debug
+def downloadImage(filename):
+  storage.child(userID["username"]+"/"+filename).download(userID["username"]+"/"+filename)
+
+uploadImage("3h.jpg")
+
+allFiles=storage.list_files()
+#downloadImage("3h.jpg")
+for file in allFiles:
+  print(file)
+  if(os.path.exists(path)==False):
+    os.mkdir(path)
+  storage.child(file.name).download(file.name)
+
+#insertUser("UOa2", "a2")
+print(selectAll())
