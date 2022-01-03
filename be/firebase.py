@@ -2,11 +2,10 @@ import pyrebase
 import os
 import base64
 from io import BytesIO
-import PIL.Image as Image
-import numpy as np
+import PIL as Image
 
-userID={"username": "UOa2", "password": "abc", "key":"1234"}
-path = userID["username"]+"/"
+# userID={"username": "UOa2", "password": "abc", "key":"1234"}
+# path = userID["username"]+"/"
 
 firebaseConfig = {
   "apiKey": "AIzaSyCrE2-NwCRX_aYNqWLO2vccndLsjFKpI6k",
@@ -23,24 +22,29 @@ firebaseConfig = {
 firebase_storage = pyrebase.initialize_app(firebaseConfig)
 storage=firebase_storage.storage()
 
-def uploadImage(filename):
-  storage.child(userID["username"]+"/"+filename).put(filename)
+def uploadImage(username, image_name):
+  storage.child(username+"/"+image_name).put(image_name)
 
-def downloadImage(filename):
-  storage.child(userID["username"]+"/"+filename).download(userID["username"]+"/"+filename)
+def downloadImage(username, image_name):
+  # if(os.path.exists(username + '/')==False):
+  #   os.mkdir(username + '/')
+  storage.child(username+"/"+image_name).download(username+'/'+image_name)
 
 def encodeImage(filename):
     with open(filename, "rb") as image_file:
         byte_string = base64.b64encode(image_file.read())
-    return byte_string
+    # return byte_string
+    f = open(filename.split('.',1)[0] + '.txt', 'wb')
+    f.write(byte_string)
 
-def decodeImage(filename):
-    with open(filename, "rb") as image_file:
-        byte_string = image_file.read()
+def decodeImage(imagename, bytestring):
+    # with open(filename, "rb") as image_file:
+    #     byte_string = image_file.read()
 
-    decoded = base64.b64decode(byte_string)
-    img = np.array(Image.open(BytesIO(decoded)))
-    fh = open(filename+'.txt', 'wb')
+    decoded = base64.b64decode(bytestring)
+    # return decoded
+    # filename = imagename.split('.',1)[0]
+    fh = open(imagename, 'wb')
     fh.write(decoded)
 
 # uploadImage("abc.png")
@@ -48,8 +52,10 @@ def decodeImage(filename):
 # allFiles=storage.list_files()
 # print(str(allFiles))
 # for file in allFiles:
-#     print(file)
-#downloadImage("3h.jpg")
+#     print(file.name, type(file.name))
+
+downloadImage("suir2","abc.png")
+
 # for file in allFiles:
 #     print(file.name)
 #     if file.name == 'UOa2/abc.png':

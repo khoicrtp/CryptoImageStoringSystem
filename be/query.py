@@ -35,7 +35,7 @@ def insertImage(username, image_url):
   mydb.commit()
 
 def selectAllImage(username):
-  sql = "SELECT * FROM IMAGE WHERE USERNAME = %s;"
+  sql = "SELECT IMAGE_URL FROM IMAGE WHERE USERNAME = %s;"
   val = (username,)
   mycursor.execute(sql, val)
   res = mycursor.fetchall()
