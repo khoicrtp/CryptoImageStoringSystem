@@ -80,6 +80,19 @@ def getImage(username, image_name):
     encodeImage(username+'/'+image_name)
     return flask.send_from_directory(username, image_name.split('.',1)[0] + '.txt', as_attachment=True)
 
+@app.route("/<string:username>/images_list/", methods=["GET"])
+def getImagesList(username):
+    images = selectAllImage(username)
+    print(images)
+    image_list = []
+    for i in range(len(images)):
+        print(images[i][0])
+        image_list.append(images[i][0])
+    print(image_list)
+    result = "|".join(image_list)
+    print(result)
+    return {"names":result}
+
 @app.route("/<string:username>/images/", methods=["GET"])
 def getImages(username):
     images = selectAllImage(username)
