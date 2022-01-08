@@ -13,7 +13,7 @@ api = Api(app)
 
 def abort_register(user, password, confirm_password):
     if password != confirm_password:
-        abort(404, message='Confirm password does not match')
+        abort(405, message='Confirm password does not match')
     if user:
         abort(404, message='Username existed')
 
@@ -29,20 +29,28 @@ def abort_login(user):
 #         return ''
 #     else: return '', 404
 
-@app.route("/users/login/", methods=["GET"])
+@app.route("/users/login/", methods=["POST"])
 def login():
-    json_data = json.loads(flask.request.get_json())
+    # print(flask.request.get_json(), type(flask.request.get_json()))
+    json_data = flask.request.get_json()
+    print(json_data, type(json_data))
+    json_data = json.loads(json_data)
     username = json_data["username"]
     password = json_data["password"]
+    # username = json_data[0]
+    # password = json_data[1]
+    # print(username)
     user = selectUser(username)
     abort_login(user)
+    # print(user[0][2])
     if user[0][1] == password:
-        return ''
+        return {"publickey":user[0][2]}
     else: return '', 404
 
 @app.route("/users/register/", methods=["POST"])
 def register():
-    json_data = json.loads(flask.request.get_json())
+    json_data = flask.request.get_json()
+    json_data = json.loads(json_data)
     username = json_data["username"]
     password = json_data["password"]
     confirm_password = json_data["confirm_password"]
@@ -71,6 +79,19 @@ def getImage(username, image_name):
     downloadImage(username, image_name)
     encodeImage(username+'/'+image_name)
     return flask.send_from_directory(username, image_name.split('.',1)[0] + '.txt', as_attachment=True)
+
+@app.route("/<string:username>/images_list/", methods=["GET"])
+def getImagesList(username):
+    images = selectAllImage(username)
+    print(images)
+    image_list = []
+    for i in range(len(images)):
+        print(images[i][0])
+        image_list.append(images[i][0])
+    print(image_list)
+    result = "|".join(image_list)
+    print(result)
+    return {"names":result}
 
 @app.route("/<string:username>/images/", methods=["GET"])
 def getImages(username):
