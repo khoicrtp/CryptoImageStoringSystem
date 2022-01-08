@@ -21,6 +21,14 @@ def abort_login(user):
     if not user:
         abort(404, message='Username does not exist or password is wrong')
 
+# @app.route("/<string:username>", methods=["GET"])
+# def login(username):
+#     user = selectUser(username)
+#     abort_login(user)
+#     if user[0][1] == password:
+#         return ''
+#     else: return '', 404
+
 @app.route("/users/login/", methods=["GET"])
 def login():
     json_data = json.loads(flask.request.get_json())
