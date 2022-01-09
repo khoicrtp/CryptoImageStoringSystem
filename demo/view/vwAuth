@@ -1,8 +1,7 @@
 from tkinter import *
-#import vwLogin
-from threading import Thread
-import threading
 
+
+from controller import auth_controller
 from tkinter import *
 
 def login():
@@ -12,11 +11,30 @@ def login():
     if uname=='' or pwd=='':
         message.set("Fill the empty field!!!")
     else:
-      if uname=="abcd@gmail.com" and pwd=="abc123":
-       message.set("Login success")
-      else:
-       message.set("Wrong username or password!!!")
-       
+        result=auth_controller.login_verify(uname,pwd)
+        if result[0]:
+            message.set("Login success")
+        else:
+            message.set("Wrong username or password!!!")
+
+def register():
+    uname=username.get()
+    pwd=password.get()
+    cf_pwd=confirmpassword.get()
+    N=n_pkeys.get()
+    E=e_pkeys.get()
+    if uname=='' or pwd=='' or cf_pwd=='' or N==0 or E==0:
+        message1.set("Fill the empty field!!!")
+    elif pwd != cf_pwd :
+        message1.set('Confirm password does not match')
+    else:
+        result=auth_controller.register_user(uname,pwd,N,E)
+        if result:
+            message1.set("Register success")
+        else:
+            message1.set("Username existed!!!")
+        
+
 def registershow():
     login_screen.withdraw()
     register_screen.deiconify()
@@ -80,7 +98,7 @@ def Registerform():
     Label( text="",textvariable=message1).place(x=200,y=240)
     Label( text="If you have an account? Login now").place(x=90,y=280)
     Button( text="Login", width=10, height=1, bg="blue",command=Loginform).place(x=90,y=300)
-    Button( text="Register", width=10, height=1, bg="blue",command=Loginform).place(x=245,y=300)
+    Button( text="Register", width=10, height=1, bg="blue",command=register).place(x=245,y=300)
     
     register_screen.mainloop()
 
