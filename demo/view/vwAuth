@@ -28,7 +28,7 @@ def Loginform():
     global username_verify
     global password_verify
     global login_screen
-    login_screen = Tk()
+    login_screen = Toplevel(register_screen)
     username_verify = StringVar()
     password_verify = StringVar()
     message=StringVar()
