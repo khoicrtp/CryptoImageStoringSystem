@@ -20,8 +20,12 @@ def login():
         result=auth_controller.login_verify(uname,pwd)
         if result:
             message.set("Login success")
+            username_verify.set("")
+            password_verify.set("")
         else:
             message.set("Wrong username or password!!!")
+            username_verify.set("")
+            password_verify.set("")
 
 def register():
     uname=username.get()
@@ -37,6 +41,11 @@ def register():
         result=auth_controller.register_user(uname,pwd,N,E)
         if result:
             message1.set("Register success")
+            username.set("")
+            password.set("")
+            confirmpassword.set("")
+            n_pkeys.set(0)
+            e_pkeys.set(0)
         else:
             message1.set("Username existed!!!")
         
