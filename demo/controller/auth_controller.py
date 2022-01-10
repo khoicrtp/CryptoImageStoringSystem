@@ -1,5 +1,5 @@
 import requests
-BASE="http://localhost:5000"
+BASE="https://test-eflask-crypto.herokuapp.com/"
 
 def login_verify(user,pw):
     json_data = {'username':user,'password':pw}
