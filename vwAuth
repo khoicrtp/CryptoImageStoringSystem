@@ -18,7 +18,7 @@ def login():
         message.set("Fill the empty field!!!")
     else:
         result=auth_controller.login_verify(uname,pwd)
-        if result[0]:
+        if result:
             message.set("Login success")
         else:
             message.set("Wrong username or password!!!")
