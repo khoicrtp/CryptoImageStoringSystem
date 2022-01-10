@@ -1,8 +1,14 @@
 from tkinter import *
 
+#import controller
+# import os, sys
 
-from controller import auth_controller
-from tkinter import *
+# p = os.path.abspath('.')
+# sys.path.insert(1, p)
+
+# import auth_controller
+
+import auth_controller
 
 def login():
     uname=username_verify.get()
