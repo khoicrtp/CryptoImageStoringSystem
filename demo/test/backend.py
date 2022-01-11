@@ -114,7 +114,9 @@ def decrypt(npy_url,save_url,D,username):
     
 def shareImg(imgname,D,username,receiver):
     request=requests.get(BASE+username+'/'+imgname+'/')
-    data=np.load(request.content)
+    
+    open(username+"/npy/"+imgname.split('.',1)[0]+".npy", 'wb').write(request.content)
+    data=np.load(username+"/npy/"+imgname.split('.',1)[0]+".npy",allow_pickle=True)
     _,e,N=getKey(username)
     
     if(_==False): return False
@@ -124,6 +126,7 @@ def shareImg(imgname,D,username,receiver):
         image1 = Image.fromarray(raw, 'RGB')
         isDone=postImgae(image1,receiver)
         if isDone:
+            print("success")
             return True
         else: return False
     except:

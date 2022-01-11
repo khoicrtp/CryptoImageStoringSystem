@@ -296,9 +296,10 @@ class sharePage(GUI):
             receiver_user=receiver.get()
             isExist,re_N,re_E=backend.getKey(receiver_user)
             if isExist:
-                tk.messagebox.showerror("Error", "Recipient does not exist!!!")
-            else:
                 tk.messagebox.showinfo("Successfully", "Then you can share image for receiver "+receiver_user)
+            else:
+                
+                tk.messagebox.showerror("Error", "Recipient does not exist!!!")
             
             
         # tit = tk.Label(frame2,text="Choose the images you want to share",bg='blue',fg='white')
@@ -306,7 +307,7 @@ class sharePage(GUI):
         # tit.pack("bottom")
         
 
-        btn3 = tk.Button(frame1, text='Choose user', command= lambda: choose_user)
+        btn3 = tk.Button(frame1, text='Choose user', command= lambda: choose_user())
         btn3.pack(side="bottom")
         
 
