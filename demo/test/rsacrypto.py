@@ -51,23 +51,3 @@ def decrypt( encrypted, d, n):
   return image
 
 
-# if __name__ == "__main__":
-#   image = Image.open("Lenna.png")
-#   data = np.asarray(image)
-#   enc_img, enc = encrypt(data, 13, 899)
-
-#   #Save image
-#   image1 = Image.fromarray(enc_img, 'RGB')
-#   image1 = image1.save("LennaAfterEncrypt.png")
-
-#   # saving encrypted but not image one to file.
-#   np.save("test.npy", enc)
-    
-#   # retrieving data from file.
-#   enc = np.load("test.npy")
-
-#   raw = decrypt(data, enc, 517, 899)
-
-#   #Save image        
-#   image1 = Image.fromarray(raw, 'RGB')
-#   image1 = image1.save("LennaAfterDecrypt.png")
