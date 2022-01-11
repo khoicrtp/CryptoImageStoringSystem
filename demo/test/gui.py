@@ -29,18 +29,19 @@ class LoginPage(tk.Tk):
         self.title('Crypto Images System')
         self.geometry("626x431")  # Sets window size to 626w x 431h pixels
         self.resizable(0, 0)  # This prevents any resizing of the screen
-        title_styles = {"font": ("Trebuchet MS Bold", 16), "background": "blue"}
+        title_styles = {"font": ("Trebuchet MS Bold", 12), "background": "blue"}
 
 
         frame_login = tk.Frame(main_frame, relief="groove", bd=2)  # this is the frame that holds all the login details and buttons
         frame_login.place(rely=0.30, relx=0.17, height=130, width=400)
 
-        label_title = tk.Label(frame_login,title_styles, text="Please enter your account below",fg="white")
+        label_title = tk.Label(frame_login, text="Please enter your account below", bg="blue",fg="white")
         label_title.grid(row=0, column=1, columnspan=1)
-
+        
         label_user = tk.Label(frame_login, text="Username:")
         label_user.grid(row=1, column=0)
 
+        
         label_pw = tk.Label(frame_login,  text="Password:")
         label_pw.grid(row=2, column=0)
 
@@ -51,11 +52,11 @@ class LoginPage(tk.Tk):
         entry_pw.grid(row=2, column=1)
 
         button = ttk.Button(frame_login, text="Login", command=lambda: getlogin())
-        button.place(rely=0.70, relx=0.50)
+        button.place(rely=0.70, relx=0.30)
 
         signup_btn = ttk.Button(frame_login, text="Register", command=lambda: get_signup())
-        signup_btn.place(rely=0.70, relx=0.75)
-
+        signup_btn.place(rely=0.70, relx=0.6)
+        frame_login.grid_rowconfigure(1, minsize=40)
         def get_signup():
             SignupPage()
 
@@ -133,6 +134,13 @@ class SignupPage(tk.Tk):
 
         button = ttk.Button(main_frame, text="Register", command=lambda: signup())
         button.grid(row=8, column=1)
+        
+        col_count, row_count = main_frame.grid_size()
+ 
+        
+        for row in range(0,row_count):
+           
+            main_frame.grid_rowconfigure(row, minsize=30)
 
         def signup():
             # Creates a text file with the Username and password
