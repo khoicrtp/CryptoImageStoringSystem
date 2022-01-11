@@ -42,7 +42,7 @@ def getKey(username):
         N=data['n_publickey']
         return True,E,N
     elif(x.status_code==404):
-        return False
+        return False,None,None
 def postImgae(img,username):
     
     timestr = time.strftime("%Y%m%d%H%M%S")
