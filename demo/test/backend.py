@@ -111,3 +111,20 @@ def decrypt(npy_url,save_url,D,username):
         return True
     except:
         return False
+    
+def shareImg(imgname,D,username,receiver):
+    request=requests.get(BASE+username+'/'+imgname+'/')
+    data=np.load(request.content)
+    _,e,N=getKey(username)
+    
+    if(_==False): return False
+    
+    try:
+        raw=rsacrypto.decrypt(data,D,N)
+        image1 = Image.fromarray(raw, 'RGB')
+        isDone=postImgae(image1,receiver)
+        if isDone:
+            return True
+        else: return False
+    except:
+        return False
