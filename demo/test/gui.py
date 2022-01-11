@@ -26,14 +26,10 @@ class LoginPage(tk.Tk):
         main_frame = tk.Frame(self, bg="#708090", height=431, width=626)  # this is the background
         main_frame.pack(fill="both", expand="true")
         self.title('Crypto Images System')
-
         self.geometry("626x431")  # Sets window size to 626w x 431h pixels
         self.resizable(0, 0)  # This prevents any resizing of the screen
         title_styles = {"font": ("Trebuchet MS Bold", 16), "background": "blue"}
 
-        # text_styles = {"font": ("Verdana", 14),
-        #                "background": "blue",
-        #                "foreground": "#E1FFFF"}
 
         frame_login = tk.Frame(main_frame, relief="groove", bd=2)  # this is the frame that holds all the login details and buttons
         frame_login.place(rely=0.30, relx=0.17, height=130, width=400)
@@ -77,7 +73,6 @@ class LoginPage(tk.Tk):
                     tk.messagebox.showinfo("Login Successful",
                                        "Welcome {}".format(username))
                     root.deiconify()
-               
                     top.destroy()
 
 
@@ -199,7 +194,6 @@ class GUI(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.main_frame = tk.Frame(self, bg="#BEB2A7", height=600, width=1024)
-        # self.main_frame.pack_propagate(0)
         self.main_frame.pack(fill="both", expand="true")
         self.main_frame.grid_rowconfigure(0, weight=1)
         self.main_frame.grid_columnconfigure(0, weight=1)
@@ -235,12 +229,13 @@ class uploadPage(GUI):  # inherits from the GUI class
                     tk.messagebox.showerror("Error", "Some thing wrong with your photo.")
                     return
                 src_img=image
-                result=backend.postImgae(src_img,usname)
+                result,url_image=backend.postImgae(src_img,usname)
                 if result==False:
                     tk.messagebox.showerror("Error", "Some thing wrong when uploading photo.")
                     return
                 size=(650,400)
-            
+                print(url_image)
+                image=Image.open(url_image)
                 image= image.resize(size,Image.ANTIALIAS)
             
                 photo=ImageTk.PhotoImage(image)
@@ -339,11 +334,8 @@ class storagePage(GUI):
         def downloadImage(isAll= False):
             if isAll==False:
                 value=str(mylist.get(mylist.curselection()))
-                # print('s'+value)
-                # filetype=[('Image Files', '.jpg .png .jpge')]
+             
                 try:
-                    #open file dialog to get file path to save image
-                    # f = asksaveasfile(mode='w',filetypes=filetype, defaultextension=filetype)
                     f=askdirectory()
                 except:
                     tk.messagebox.showerror("Error", "Some thing wrong!")
@@ -383,7 +375,6 @@ class storagePage(GUI):
         scrollbar.config( command = mylist.yview )
 
 #main
-
 root=MyApp()
 root.title("Tkinter App Template")
 root.withdraw()
