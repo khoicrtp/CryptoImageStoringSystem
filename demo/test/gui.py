@@ -1,7 +1,7 @@
 from platform import uname
 import tkinter as tk
 from tkinter import messagebox
-from tkinter import ttk
+from tkinter import ttk,HORIZONTAL
 from tkinter.font import BOLD
 from PIL import ImageTk, Image
 from tkinter.filedialog import askopenfile 
@@ -9,6 +9,7 @@ from tkinter.filedialog import asksaveasfile
 from tkinter.filedialog import askdirectory
 import app
 import backend
+import threading
 
 
 frame_styles = {"relief": "groove",
@@ -29,20 +30,20 @@ class LoginPage(tk.Tk):
         self.resizable(0, 0)  # This prevents any resizing of the screen
         title_styles = {"font": ("Trebuchet MS Bold", 16), "background": "blue"}
 
-        text_styles = {"font": ("Verdana", 14),
-                       "background": "blue",
-                       "foreground": "#E1FFFF"}
+        # text_styles = {"font": ("Verdana", 14),
+        #                "background": "blue",
+        #                "foreground": "#E1FFFF"}
 
-        frame_login = tk.Frame(main_frame, bg="blue", relief="groove", bd=2)  # this is the frame that holds all the login details and buttons
+        frame_login = tk.Frame(main_frame, relief="groove", bd=2)  # this is the frame that holds all the login details and buttons
         frame_login.place(rely=0.30, relx=0.17, height=130, width=400)
 
-        label_title = tk.Label(frame_login, title_styles, text="Login Page")
+        label_title = tk.Label(frame_login,title_styles, text="Please enter your account below",fg="white")
         label_title.grid(row=0, column=1, columnspan=1)
 
-        label_user = tk.Label(frame_login, text_styles, text="Username:")
+        label_user = tk.Label(frame_login, text="Username:")
         label_user.grid(row=1, column=0)
 
-        label_pw = tk.Label(frame_login, text_styles, text="Password:")
+        label_pw = tk.Label(frame_login,  text="Password:")
         label_pw.grid(row=2, column=0)
 
         entry_user = ttk.Entry(frame_login, width=45, cursor="xterm")
@@ -63,7 +64,6 @@ class LoginPage(tk.Tk):
         def getlogin():
             username = entry_user.get()
             password = entry_pw.get()
-            # if your want to run the script as it is set validation = True
             if username=='' or password=='':
                 tk.messagebox.showerror("Information","Fill the empty field!!!")
             else:
@@ -86,36 +86,37 @@ class SignupPage(tk.Tk):
 
         tk.Tk.__init__(self, *args, **kwargs)
 
-        main_frame = tk.Frame(self, bg="#3F6BAA", height=150, width=250)
+        main_frame = tk.Frame(self, height=150, width=250)
         # pack_propagate prevents the window resizing to match the widgets
         main_frame.pack_propagate(0)
         main_frame.pack(fill="both", expand="true")
 
-        self.geometry("270x170")
+        self.title("Crypto Images System")
+        self.geometry("400x350")
         self.resizable(0, 0)
 
         self.title("Registration")
 
-        text_styles = {"font": ("Verdana", 10),
-                       "background": "#3F6BAA",
-                       "foreground": "#E1FFFF"}
 
-        label_user = tk.Label(main_frame, text_styles, text="Username:")
+        
+        label_title = tk.Label(main_frame, text="Please enter information of your account below", bg="blue",fg="white")
+        label_title.grid(row=0, column=1, columnspan=1)
+        label_user = tk.Label(main_frame, text="Username:")
         label_user.grid(row=1, column=0)
 
-        label_pw = tk.Label(main_frame, text_styles, text="Password:")
+        label_pw = tk.Label(main_frame, text="Password:")
         label_pw.grid(row=2, column=0)
 
-        label_pw = tk.Label(main_frame, text_styles, text="Confirm Password:")
+        label_pw = tk.Label(main_frame, text="Confirm Password:")
         label_pw.grid(row=3, column=0)
 
-        label_rsakey = tk.Label(main_frame, text_styles,font='BOLD', text="Public kEY")
+        label_rsakey = tk.Label(main_frame, font='BOLD', text="Public Key:")
         label_rsakey.grid(row=4, column=0)
 
-        label_e = tk.Label(main_frame, text_styles, text="E:")
+        label_e = tk.Label(main_frame, text="E:")
         label_e.grid(row=5, column=0)
 
-        label_n = tk.Label(main_frame, text_styles, text="N:")
+        label_n = tk.Label(main_frame, text="N:")
         label_n.grid(row=6, column=0)
 
         entry_user = ttk.Entry(main_frame, width=20, cursor="xterm")
@@ -133,8 +134,8 @@ class SignupPage(tk.Tk):
         entry_n = ttk.Entry(main_frame, width=20, cursor="xterm")
         entry_n.grid(row=6, column=1)
 
-        button = ttk.Button(main_frame, text="Create Account", command=lambda: signup())
-        button.grid(row=7, column=1)
+        button = ttk.Button(main_frame, text="Register", command=lambda: signup())
+        button.grid(row=8, column=1)
 
         def signup():
             # Creates a text file with the Username and password
@@ -212,6 +213,8 @@ class uploadPage(GUI):  # inherits from the GUI class
         frame2 = tk.LabelFrame(self, frame_styles, text="Encrypted Image")
         frame2.place(rely=0.05, relx=0.25, height=400, width=650)
 
+        self.progress = ttk.Progressbar(frame1, orient=HORIZONTAL,length=100,  mode='indeterminate')
+
         load_bar = tk.Frame(frame1, width=180, height=185)
         load_bar.grid(row=2, column=0, padx=5, pady=5)
         def open_file():
@@ -222,25 +225,33 @@ class uploadPage(GUI):  # inherits from the GUI class
                 return
             if file_path is None:
                 return
-            size=(650,400)
-            try:
-                image=Image.open(file_path.name)
-            except:
-                tk.messagebox.showerror("Error", "Some thing wrong with your photo.")
-                return
-            src_img=image
-            image= image.resize(size,Image.ANTIALIAS)
+            def real_traitement():
+                self.progress.grid(row=1,column=0)
+                self.progress.start()
+                try:
+                    image=Image.open(file_path.name)
+                except:
+                    tk.messagebox.showerror("Error", "Some thing wrong with your photo.")
+                    return
+                src_img=image
+                result=backend.postImgae(src_img,usname)
+                if result==False:
+                    tk.messagebox.showerror("Error", "Some thing wrong when uploading photo.")
+                    return
+                size=(650,400)
             
-            photo=ImageTk.PhotoImage(image)
-            label= tk.Label(frame2, image=photo)
-            label.image= photo
-            label.grid(row=0,column=0, )
+                image= image.resize(size,Image.ANTIALIAS)
+            
+                photo=ImageTk.PhotoImage(image)
+                label= tk.Label(frame2, image=photo)
+                label.image= photo
+                label.grid(row=0,column=0, )
+                self.progress.stop()
+                self.progress.grid_forget()
 
             'post image'
-            result=backend.postImgae(src_img,usname)
-            if result==False:
-                tk.messagebox.showerror("Error", "Some thing wrong when uploading photo.")
-                return
+            threading.Thread(target=real_traitement).start()
+            
         upload_img_btn = tk.Button(frame1, text='Upload Photo', command=lambda:open_file())
         upload_img_btn.grid(row=2, column=0)
         
@@ -256,7 +267,7 @@ class storagePage(GUI):
         frame1 = tk.LabelFrame(self, frame_styles, text="List")
         frame1.place(rely=0.05, relx=0.02, height=400, width=200)
 
-        frame2 = tk.LabelFrame(self, frame_styles, text="Image")
+        frame2 = tk.LabelFrame(self, frame_styles, text="Decrypt")
         frame2.place(rely=0.05, relx=0.25, height=400, width=650)
 
         scrollbar = tk.Scrollbar(frame1)
@@ -264,35 +275,63 @@ class storagePage(GUI):
 
         mylist = tk.Listbox(frame1, yscrollcommand = scrollbar.set,width=40 )
         
-        files = app.retriveimages() #get all file in storage firebase
-        #files=backend.retriveimages(usname)
-        'create a list box with all file get above'
-        for file in files: 
-            mylist.insert(tk.END, file.name) 
         
-        'A call back function in mylist.bind. When user choose a file in list box'
-        'A image will be downloaded from firebase then show it on frame'
-        'A image file will be saved in current project folder'
+        global folder_path
+        folder_path = tk.StringVar()
+        def browse_savebutton():
+            # Allow user to select a directory and store it in global var
+            filename = tk.filedialog.askdirectory()
+            folder_path.set(filename)
+            print(folder_path.get())
+            print(type(folder_path.get()))
+            print(filename)
+        tit = tk.Label(frame2,text="Browse a path to save decrypted image:",bg='blue',fg='white')
+        tit.grid(row=2, column=1)
+        lbl1 = tk.Label(frame2,textvariable=folder_path)
+        lbl1.grid(row=2, column=3)
+        button3 = tk.Button(frame2,text="Browse", command=browse_savebutton)
+        button3.grid(row=2, column=2)
+
+        global decrypted_path
+        decrypted_path = tk.StringVar()
+        def browse_decryptbutton():
+            # Allow user to select a directory and store it in global var
+            filename = askopenfile(mode='r', filetypes=[('Numpy Files', '.npy')])
+            decrypted_path.set(filename.name)
+            print(filename)
+        tit1 = tk.Label(frame2,text="Browse a decrypted image file to decrypt:",bg='blue',fg='white')
+        tit1.grid(row=4, column=1)
+        lbl2 = tk.Label(frame2,textvariable=decrypted_path)
+        lbl2.grid(row=4, column=3)
+        button2 = tk.Button(frame2,text="Browse", command=browse_decryptbutton)
+        button2.grid(row=4, column=2)
+
+
+        def decryptbutton():
+
+            if(folder_path.get() == '' or decrypted_path.get() =='' ):
+                tk.messagebox.showerror("Error", "Your path is empty!! Pls browse!!")
+                return
+            USER_INP = tk.simpledialog.askstring(title="Test",prompt="Input your secret key (d):")
+            if USER_INP=='':
+                tk.messagebox.showerror("Error", "Your private key filed are empty!! Pls input!!")
+            else:
+                
+                isDone=backend.decrypt(decrypted_path.get(),folder_path.get(),int(USER_INP),usname)
+                if(isDone==False):
+                    tk.messagebox.showerror("Error", "Cannot decrypt!! Maybe you input wrong pKey!!")
+                else:
+                    tk.messagebox.showinfo("Successfully", "Oh yeah!")
+                
+            
+        button2 = tk.Button(frame2,text="Decrypt", command=decryptbutton)
+        button2.grid(row=5, column=2)
       
         def callback(event):
             selection = event.widget.curselection()
             index = selection[0]
             data = event.widget.get(index)
-            # try:
-            #     app.downloadtoshow(data)
-            # except:
-            #     tk.messagebox.showerror("Error", "Some thing wrong!")
-            #     return
-            # image=Image.open("output.jpg")
-            # # except:
-            # #     tk.messagebox.showerror("Error", "Some thing wrong!")
-            # size=(650,400)
-            # image= image.resize(size,Image.ANTIALIAS)
-            # photo=ImageTk.PhotoImage(image)
-            # label= tk.Label(frame2, image=photo)
-            # label.image= photo
-            # label.grid(row=0,column=0, )
-        
+    
         mylist.bind('<<ListboxSelect>>',callback)
 
         'when users press button (btn2). A current image wil be move to a direct path which is selected by user'
@@ -310,15 +349,10 @@ class storagePage(GUI):
                     return
                 if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
                     return
-                # value=value.split('/')[-1]
-                app.downloadImage(value,f)
-                # im = Image.open("output.jpg") #get current image
-                # if im.mode != "RGB":
-                #     im = im.convert("RGB")
-                # im.save(f) #save it to path f
+                backend.downloadAImage(value,f,usname)
             else:
                 f=askdirectory()
-                app.downloadAll(f)
+                backend.downloadAll(f,usname)
             
        
         btn2 = tk.Button(frame1, text='Download Image', command= lambda: downloadImage())
@@ -329,9 +363,13 @@ class storagePage(GUI):
         'functions to refresh list box. When user upload a photo from uploadPage '
         'They need to press Refresh button to update new photo to GUI'
         def LoadList():
-            self.files = app.retriveimages()
-            for file in self.files:
-                mylist.insert(tk.END, file.name)
+            isOk,files=backend.retriveimages(usname)
+            if(isOk==False):
+                tk.messagebox.showerror("Error", "Cannot connect to server.")
+            else:
+                'create a list box with all file get above'
+                for file in files: 
+                    mylist.insert(tk.END, file[0].split('.',1)[0]) 
         def Refresh_data():
             # Deletes the data in the current listbox and reinserts it.
             mylist.delete(0,tk.END)  
