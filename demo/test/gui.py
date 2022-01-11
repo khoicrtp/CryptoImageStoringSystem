@@ -2,6 +2,7 @@ from platform import uname
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk,HORIZONTAL
+from tkinter.constants import CENTER
 from tkinter.font import BOLD
 from PIL import ImageTk, Image
 from tkinter.filedialog import askopenfile 
@@ -160,6 +161,7 @@ class MenuBar(tk.Menu):
         #to Switch pages
         self.add_command(label="Upload", command=lambda: parent.show_frame(uploadPage))
         self.add_command(label="Storage", command=lambda: parent.show_frame(storagePage))
+        self.add_command(label="Share", command=lambda: parent.show_frame(sharePage))
 
 class MyApp(tk.Tk):
     'to control the frames of apps'
@@ -175,7 +177,7 @@ class MyApp(tk.Tk):
         self.resizable(0, 0)
         self.geometry("900x600")
         self.frames = {}
-        pages = (uploadPage,storagePage)
+        pages = (uploadPage,storagePage,sharePage)
         for F in pages:
             frame = F(main_frame, self)
             self.frames[F] = frame
@@ -254,13 +256,108 @@ class uploadPage(GUI):  # inherits from the GUI class
            
     
 
+class sharePage(GUI):
+    'Show list of images from firebase'
+    def __init__(self, parent, controller):
+        
+        GUI.__init__(self, parent)
+        
+        frame1 = tk.LabelFrame(self, frame_styles, text="Reciver")
+        frame1.place(rely=0.05, relx=0.02, height=100, width=300)
+
+        frame2 = tk.LabelFrame(self, frame_styles, text="My images")
+        frame2.place(rely=0.05, relx=0.4, height=400, width=500)
+
+        scrollbar = tk.Scrollbar(frame2)
+        scrollbar.pack( side = tk.RIGHT, fill = tk.Y )
+
+        mylist = tk.Listbox(frame2,selectmode = "multiple", yscrollcommand = scrollbar.set,width=80 )
+        global receiver
+        receiver = tk.StringVar()
+        tk.Label(frame1, text="Please enter username of receiver", bg="blue",fg="white").pack(side="top")
+        re=tk.Entry(frame1, textvariable=receiver)
+        tk.Label(frame2, text="Choose the images you want to share", bg="blue",fg="white").pack(side="top",fill = tk.BOTH)
+        re.pack(side="top")
+        
+        share_img=[]
+        def callback(event):
+            selection = event.widget.curselection()
+            if share_img != []:
+                share_img.clear()
+            for i in selection:
+                share_img.append(event.widget.get(i)) 
+            
+    
+        mylist.bind('<<ListboxSelect>>',callback)
+        
+        def choose_user():
+            global receiver_user,re_N,re_E
+            # Allow user to select a directory and store it in global var
+            receiver_user=receiver.get()
+            isExist,re_N,re_E=backend.getKey(receiver_user)
+            if isExist:
+                tk.messagebox.showerror("Error", "Recipient does not exist!!!")
+            else:
+                tk.messagebox.showinfo("Successfully", "Then you can share image for receiver "+receiver_user)
+            
+            
+        # tit = tk.Label(frame2,text="Choose the images you want to share",bg='blue',fg='white')
+        # #tit.grid(row=2, column=1)
+        # tit.pack("bottom")
+        
+
+        btn3 = tk.Button(frame1, text='Choose user', command= lambda: choose_user)
+        btn3.pack(side="bottom")
+        
+
+
+        def shareimages():
+
+            USER_INP = tk.simpledialog.askstring(title="Test",prompt="Input your secret key (d):")
+            if USER_INP=='':
+                tk.messagebox.showerror("Error", "Your private key filed are empty!! Pls input!!")
+            else:
+                for img in share_img:
+                    
+                    isDone=backend.shareImg(img,int(USER_INP),usname,receiver_user)
+                if(isDone==False):
+                    tk.messagebox.showerror("Error", "Cannot share image to receiver!! ")
+                else:
+                    tk.messagebox.showinfo("Successfully", "Oh yeah!")
+        button3 = tk.Button(frame2,text="Share", command=shareimages)
+        button3.pack(side="bottom",fill = tk.BOTH)        
+
+        'functions to refresh list box. When user upload a photo from uploadPage '
+        'They need to press Refresh button to update new photo to GUI'   
+        
+        def LoadList():
+            isOk,files=backend.retriveimages(usname)
+            if(isOk==False):
+                tk.messagebox.showerror("Error", "Cannot connect to server.")
+            else:
+                'create a list box with all file get above'
+                for file in files: 
+                    mylist.insert(tk.END, file[0].split('.',1)[0]) 
+        def Refresh_data():
+            # Deletes the data in the current listbox and reinserts it.
+            mylist.delete(0,tk.END)  
+            LoadList()
+
+        button1 = tk.Button(frame2, text="Refresh", command=lambda: Refresh_data())
+        button1.pack(side="top")
+
+        mylist.pack( side = tk.LEFT, fill = tk.BOTH )
+        scrollbar.config( command = mylist.yview )
+
+
+
 class storagePage(GUI):
     'Show list of images from firebase'
     def __init__(self, parent, controller):
         
         GUI.__init__(self, parent)
         
-        frame1 = tk.LabelFrame(self, frame_styles, text="List")
+        frame1 = tk.LabelFrame(self, frame_styles, text="List my images")
         frame1.place(rely=0.05, relx=0.02, height=400, width=200)
 
         frame2 = tk.LabelFrame(self, frame_styles, text="Decrypt")
@@ -334,7 +431,9 @@ class storagePage(GUI):
         def downloadImage(isAll= False):
             if isAll==False:
                 value=str(mylist.get(mylist.curselection()))
-             
+                # print('s'+value)
+                # filetype=[('Image Files', '.jpg .png .jpge')]
+
                 try:
                     f=askdirectory()
                 except:
@@ -373,6 +472,7 @@ class storagePage(GUI):
 
         mylist.pack( side = tk.LEFT, fill = tk.BOTH )
         scrollbar.config( command = mylist.yview )
+
 
 #main
 root=MyApp()
