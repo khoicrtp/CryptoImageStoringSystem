@@ -1,11 +1,15 @@
+import re
 import requests
 import json
 import base64
+
+from requests.api import request
 import rsacrypto
 import numpy as np
 from PIL import Image
 import time
 import os
+import ast
 BASE="https://test-eflask-crypto.herokuapp.com/"
 
 def makedir(user):
@@ -30,17 +34,17 @@ def register_user(user,pw,n,e):
     elif(response.status_code==404):
         return False
     
-def register_user(user,pw,n,e):
-    json_data = json.dumps({'username':user,'password':pw,'n_publickey':n,'e_publickey':e})
-    response = requests.post(BASE+'/users/register',json=json_data)
-    if(response.status_code==200):
-        return True
-    elif(response.status_code==404):
-        return False
+# def register_user(user,pw,n,e):
+#     json_data = json.dumps({'username':user,'password':pw,'n_publickey':n,'e_publickey':e})
+#     response = requests.post(BASE+'/users/register',json=json_data)
+#     if(response.status_code==200):
+#         return True
+#     elif(response.status_code==404):
+#         return False
     
     
 def getKey(username):
-    x = requests.get(BASE+'/'+username)
+    x = requests.get(BASE+username)
     if(x.status_code==200):
         data=dict(x.json())
         E=data['e_publickey']
@@ -53,8 +57,8 @@ def postImgae(img,username):
     timestr = time.strftime("%Y%m%d%H%M%S")
     makedir(username)
     data = np.asarray(img)
-    #_,e,n=getKey(username)
-    enc_img, enc = rsacrypto.encrypt(data, 13, 899)
+    _,e,n=getKey(username)
+    enc_img, enc = rsacrypto.encrypt(data, e, n)
 
     image1 = Image.fromarray(enc_img, 'RGB')
     image1 = image1.save(username+"/encrypted/"+timestr+".png")
@@ -69,21 +73,51 @@ def postImgae(img,username):
     elif(response.status_code==404):
         return False
 
-def getImage(url,username):
-    x = requests.get(BASE+'/'+username)
-    None
+
 def retriveimages(username):
-    x = requests.get(BASE+'/'+username+'/images_list')
+    x = requests.get(BASE+username+'/images_list/')
+    print(x.status_code)
     if(x.status_code==200):
-        data=dict(x.json())
-        values=data['names']
-        files=[]
-        for val in values:
-            files.append(val[0])
-        return True,files
+        data=x.json()['names']
+        data=ast.literal_eval(data)
+        return True,data
     elif(x.status_code==404):
+        return False,None
+
+def downloadAImage(imgname,url,username):
+    request=requests.get(BASE+username+'/'+imgname+'/')
+    #open(username+'/images/'+imgname.split('.',1)[0]+'.npy', 'wb').write(request.content)
+    open(url+'/'+imgname.split('.',1)[0]+'.npy', 'wb').write(request.content)
+    # data=np.load(username+'/images/'+imgname.split('.',1)[0]+'.npy')
+    # raw=rsacrypto.decrypt()
+    print(request.status_code)
+    if(request.status_code==200):
+        return True
+    elif(request.status_code==404):
         return False
 
-def downloadAImage(username,url):
+def downloadAll(url,username):
+    request=requests.get(BASE+username+'/images/')
+    chunk_size=128
+    with open(url+'/Images.zip','wb') as fd:
+        for chunk in request.iter_content(chunk_size=chunk_size):
+            fd.write(chunk)
+    print(request.status_code)
+    if(request.status_code==200):
+        return True
+    elif(request.status_code==404):
+        return False
 
-    None
+def decrypt(npy_url,save_url,D,username):
+    data=np.load(npy_url)
+    _,e,N=getKey(username)
+    
+    if(_==False): return False
+    
+    try:
+        raw=rsacrypto.decrypt(data,D,N)
+        image1 = Image.fromarray(raw, 'RGB')
+        image1 = image1.save(save_url+'/'+(npy_url.split('/')[-1]).split('.')[0]+'.png')
+        return True
+    except:
+        return False
