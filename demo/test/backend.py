@@ -34,15 +34,6 @@ def register_user(user,pw,n,e):
     elif(response.status_code==404):
         return False
     
-# def register_user(user,pw,n,e):
-#     json_data = json.dumps({'username':user,'password':pw,'n_publickey':n,'e_publickey':e})
-#     response = requests.post(BASE+'/users/register',json=json_data)
-#     if(response.status_code==200):
-#         return True
-#     elif(response.status_code==404):
-#         return False
-    
-    
 def getKey(username):
     x = requests.get(BASE+username)
     if(x.status_code==200):
@@ -58,8 +49,8 @@ def postImgae(img,username):
     makedir(username)
     data = np.asarray(img)
     _,e,n=getKey(username)
+    if(_==False): return False
     enc_img, enc = rsacrypto.encrypt(data, e, n)
-
     image1 = Image.fromarray(enc_img, 'RGB')
     image1 = image1.save(username+"/encrypted/"+timestr+".png")
     np.save(username+"/npy/"+timestr+".npy", enc)
@@ -69,7 +60,7 @@ def postImgae(img,username):
     response = requests.post(BASE+username+'/'+timestr+'.png/',files=files)
     print(response.status_code)
     if(response.status_code==200):
-        return True
+        return True,username+"/encrypted/"+timestr+".png"
     elif(response.status_code==404):
         return False
 
@@ -86,10 +77,9 @@ def retriveimages(username):
 
 def downloadAImage(imgname,url,username):
     request=requests.get(BASE+username+'/'+imgname+'/')
-    #open(username+'/images/'+imgname.split('.',1)[0]+'.npy', 'wb').write(request.content)
+    
     open(url+'/'+imgname.split('.',1)[0]+'.npy', 'wb').write(request.content)
-    # data=np.load(username+'/images/'+imgname.split('.',1)[0]+'.npy')
-    # raw=rsacrypto.decrypt()
+
     print(request.status_code)
     if(request.status_code==200):
         return True
