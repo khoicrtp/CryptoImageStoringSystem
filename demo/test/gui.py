@@ -25,6 +25,7 @@ class LoginPage(tk.Tk):
 
         main_frame = tk.Frame(self, bg="#708090", height=431, width=626)  # this is the background
         main_frame.pack(fill="both", expand="true")
+        self.title('Crypto Images System')
 
         self.geometry("626x431")  # Sets window size to 626w x 431h pixels
         self.resizable(0, 0)  # This prevents any resizing of the screen
